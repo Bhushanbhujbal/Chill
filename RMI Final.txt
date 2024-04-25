@@ -1,0 +1,126 @@
+Name:Bhushan Manojkumar Bhujbal
+Roll No: 503
+Practical: RMI
+//***********************************************************************//
+
+import java.rmi.*;
+
+public interface Add extends Remote{
+	public int add(int a,int b) throws RemoteException;
+	public int sub(int a,int b) throws RemoteException;
+	public int mul(int a,int b) throws RemoteException;
+	public int div(int a,int b) throws RemoteException;
+}
+
+
+import java.rmi.*;
+import java.rmi.server.*;
+
+public class impl extends UnicastRemoteObject implements Add {
+	impl() throws RemoteException{
+	super();
+	}
+	public int add(int a,int b){
+	return a+b;
+	}
+	public int sub(int a,int b){
+	return a-b;
+	}
+	public int mul(int a,int b){
+	return a*b;
+	}
+	public int div(int a,int b){
+	return a/b;
+	}
+	
+}
+
+
+import java.rmi.*;
+import java.rmi.registry.*;
+
+public class Server{
+	public static void main(String args[]){
+		try{
+			Add obj=new AddImpl();
+			Naming.rebind("rmi://localhost/guru",obj);
+			
+			System.out.println("Server Started");
+		}
+		catch(Exception e){
+			System.out.println(e);
+		}
+			
+	}
+}
+
+
+import java.rmi.*;
+
+public class Client{
+	public static void main(String args[]){
+	
+		try{
+			Add obj=(Add)Naming.lookup("rmi://localhost/guru");
+			System.out.println("Addition is: "+obj.add(10,50));
+			System.out.println("Subtraction is: "+obj.sub(155,55));
+			System.out.println("Muiltiplication is: "+obj.mul(56,367));
+			System.out.println("Division is: "+obj.div(70,70));
+			
+		}
+		catch(Exception e){
+			System.out.println(e);
+		}
+		
+	}
+}
+	
+	public static void main(String args[]){
+		
+	Client c=new Client();
+	c.setName("Thread 1");
+	c.start();
+	Client c2=new Client();
+	c.setName("Thread 2");
+	c2.start();
+	
+	
+		
+		
+	}
+}
+
+
+Output:
+it@it-HP-EliteDesk-800-G2-SFF:~/Documents/Bhushan/RMI$ javac *.java
+it@it-HP-EliteDesk-800-G2-SFF:~/Documents/Bhushan/RMI$ rmic impl
+Warning: generation and use of skeletons and static stubs for JRMP	
+is deprecated. Skeletons are unnecessary, and static stubs have	
+been superseded by dynamically generated stubs. Users are	
+encouraged to migrate away from using rmic to generate skeletons and static	
+stubs. See the documentation for java.rmi.server.UnicastRemoteObject.
+it@it-HP-EliteDesk-800-G2-SFF:~/Documents/Bhushan/RMI$ rmiregistry
+
+
+//*************************************************************//
+
+Server
+
+it@it-HP-EliteDesk-800-G2-SFF:~/Documents/Bhushan/RMI$ java Server
+Server Started
+
+
+
+//**************************************//
+
+it@it-HP-EliteDesk-800-G2-SFF:~/Documents/Bhushan/RMI$ java Client
+Addition is: 60
+Subtraction is: 100
+Muiltiplication is: 20552
+Division is: 1
+it@it-HP-EliteDesk-800-G2-SFF:~/Documents/Bhushan/RMI$ 
+
+
+
+
+

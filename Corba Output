@@ -1,0 +1,275 @@
+Name:-Bhushan Manojkumar Bhujbal
+Roll No:-503
+Practical:-DS(Corba Calculator)
+
+//***********************************************************************//
+Code:-
+//Addition.idl
+
+    /**
+     *
+     * @author imed
+     */
+    module AdditionApp
+    {
+      interface Addition
+      {
+        double add(in double a, in double b);
+    	double subtract(in double a, in double b);
+    	double multiply(in double a, in double b);
+   	double divide(in double a, in double b);
+        };
+    };
+//***********************************************************************************//
+//AdditionObj.java
+
+    /**
+     *
+     * @author imed
+     */
+    import AdditionApp.*;
+    import org.omg.CosNaming.*;
+    import org.omg.CosNaming.NamingContextPackage.*;
+    import org.omg.CORBA.*;
+    import org.omg.PortableServer.*;
+    import org.omg.PortableServer.POA;
+    import java.util.Properties;
+     
+    class AdditionObj extends AdditionPOA {
+      private ORB orb;
+     
+      public void setORB(ORB orb_val) {
+        orb = orb_val; 
+      }
+     
+      public double add(double a, double b) {
+    return a + b;
+  }
+
+  public double subtract(double a, double b) {
+    return a - b;
+  }
+
+  public double multiply(double a, double b) {
+    return a * b;
+  }
+
+  public double divide(double a, double b) {
+    return a/ b;
+  }
+     
+      // implement shutdown() method
+      public void shutdown() {
+        orb.shutdown(false);
+      }
+    }
+
+ //***************************************************************************//  
+//StartServer.java
+
+
+    /**
+     *
+     * @author imed
+     */
+    import AdditionApp.*;
+     
+    import org.omg.CosNaming.*;
+    import org.omg.CosNaming.NamingContextPackage.*;
+    import org.omg.CORBA.*;
+    import org.omg.PortableServer.*;
+    import org.omg.PortableServer.POA;
+    import java.util.Properties;
+     
+    public class StartServer {
+     
+      public static void main(String args[]) {
+        try{
+          // create and initialize the ORB //// get reference to rootpoa &amp; activate the POAManager
+          ORB orb = ORB.init(args, null);      
+          POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+          rootpoa.the_POAManager().activate();
+     
+          // create servant and register it with the ORB
+          AdditionObj addobj = new AdditionObj();
+          addobj.setORB(orb); 
+     
+          // get object reference from the servant
+          org.omg.CORBA.Object ref = rootpoa.servant_to_reference(addobj);
+          Addition href = AdditionHelper.narrow(ref);
+     
+          org.omg.CORBA.Object objRef =  orb.resolve_initial_references("NameService");
+          NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+     
+          NameComponent path[] = ncRef.to_name( "ABC" );
+          ncRef.rebind(path, href);
+     
+          System.out.println("Calculator Server is ready and waiting ...");
+     
+          // wait for invocations from clients
+          for (;;){
+    	  orb.run();
+          }
+        } 
+     
+          catch (Exception e) {
+            System.err.println("ERROR: " + e);
+            e.printStackTrace(System.out);
+          }
+     
+          System.out.println("Server Exiting ...");
+     
+      }
+    }
+
+//************************************************************************************//
+  //StartClient.java
+
+    /**
+     *
+     * @author imed
+     */
+    import AdditionApp.*;
+     
+    import org.omg.CosNaming.*;
+    import org.omg.CosNaming.NamingContextPackage.*;
+    import org.omg.CORBA.*;
+    import java.io.*;
+    import java.util.*;
+     
+    public class StartClient {
+     
+        /**
+         * @param args the command line arguments
+         */
+        public static void main(String[] args) {
+          try {
+    	    ORB orb = ORB.init(args, null);
+    	    org.omg.CORBA.Object objRef =   orb.resolve_initial_references("NameService");
+    	    NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+    	    Addition addobj = (Addition) AdditionHelper.narrow(ncRef.resolve_str("ABC"));
+     
+                System.out.println("Welcome to the Calculator system:"); 
+		Scanner c=new Scanner(System.in);
+		for(;;){
+			System.out.println("Enter Your Choice ");
+    		      System.out.println("1 for Addition");
+    		      System.out.println("2 for Subtraction");
+    		      System.out.println("3 for Multiplication");
+    		      System.out.println("4 for Division");
+ 			System.out.println("5 for Exit");
+			int choice=c.nextInt();
+			if(choice==5){
+			break;
+				}
+			System.out.println("Enter a:");
+    		      	double a=c.nextDouble();
+    		      System.out.println("Enter b:");
+    		      double b=c.nextDouble();
+    		      switch(choice){
+      		      case 1:
+      		        System.out.println((int)a + " + " + (int)b + " = " + (int)addobj.add(a, b));
+      		        break;
+      		      case 2:
+      		        System.out.println((int)a + " - " + (int)b + " = " + (int)addobj.subtract(a, b));
+      		        break;
+      		       case 3:
+      		        System.out.println((int)a + " * " + (int)b + " = " + (int)addobj.multiply(a, b));
+      		        break;
+      		       case 4:
+      		        System.out.println((int)a + " / " + (int)b + " = " + (int)addobj.divide(a, b));
+      		        break;
+      		        default:
+      		        	System.out.println("Invalid Choice");
+    		        }
+            
+			} 
+		}     		    
+   
+           catch (Exception e) {
+              System.out.println("Hello Client exception: " + e);
+    	  e.printStackTrace();
+           }
+     
+        }
+     
+    }
+
+
+
+//***********************************************************************//
+
+OUTPUT:-
+1st Terminal:-
+
+(base) itl1@itl1-OptiPlex-390:~/Desktop/bHUSHAN/Corba$ idlj -fall Addition.idl(base) itl1@itl1-OptiPlex-390:~/Desktop/bHUSHAN/Corba$ javac *.java AdditionApp/*.java
+Note: AdditionApp/AdditionPOA.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+(base) itl1@itl1-OptiPlex-390:~/Desktop/bHUSHAN/Corba$ orbd -ORBInitialPort 1050&
+[1] 7496
+(base) itl1@itl1-OptiPlex-390:~/Desktop/bHUSHAN/Corba$ java StartServer -ORBInitialPort 1050 -ORBInitialHost localhost&
+[2] 7514
+(base) itl1@itl1-OptiPlex-390:~/Desktop/bHUSHAN/Corba$ Calculator Server is ready and waiting ...
+
+//**********************************************************************************//
+2n Terminal:-
+(base) itl1@itl1-OptiPlex-390:~/Desktop/bHUSHAN/Corba$ java StartClient -ORBInitialPort 1050 -ORBInitialHost localhost
+Welcome to the Calculator system:
+Enter Your Choice 
+1 for Addition
+2 for Subtraction
+3 for Multiplication
+4 for Division
+5 for Exit
+1
+Enter a:
+10
+Enter b:
+2
+10 + 2 = 12
+Enter Your Choice 
+1 for Addition
+2 for Subtraction
+3 for Multiplication
+4 for Division
+5 for Exit
+2
+Enter a:
+10
+Enter b:
+2
+10 - 2 = 8
+Enter Your Choice 
+1 for Addition
+2 for Subtraction
+3 for Multiplication
+4 for Division
+5 for Exit
+3
+Enter a:
+56
+Enter b:
+365
+56 * 365 = 20440
+Enter Your Choice 
+1 for Addition
+2 for Subtraction
+3 for Multiplication
+4 for Division
+5 for Exit
+4
+Enter a:
+50
+Enter b:
+5
+50 / 5 = 10
+Enter Your Choice 
+1 for Addition
+2 for Subtraction
+3 for Multiplication
+4 for Division
+5 for Exit
+5
+(base) itl1@itl1-OptiPlex-390:~/Desktop/bHUSHAN/Corba$ 
+
+
